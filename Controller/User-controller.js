@@ -26,14 +26,18 @@ export async function userRegister (req,res){
         })
 
         await user.save()
-
+        const token = jwt.sign({ userId: user._id}, process.env.SECRET_KEY, {
+            expiresIn: "1d"
+        })
         return res.status(201).json({
+            token,
             message: "User Register successfully"
         })
 
     } catch (error) {
         console.log(error)
         return res.status(500).json({
+
             message: "Something went wrong"
         })
     }
