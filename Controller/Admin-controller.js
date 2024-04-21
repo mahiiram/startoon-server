@@ -1,28 +1,27 @@
-import Usermodel from "../Model/Model.js";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken'
+import AdminModel from "../Model/AdminModel.js";
+import Usermodel from '../Model/Model.js';
 
 
-export async function userRegister (req,res){
-    const { email, password, gender, name } = req.body;
+export async function AdminRegister (req,res){
+    const { email, password } = req.body;
 
     try {
-        let user = await Usermodel.findOne({ email });
+        let user = await AdminModel.findOne({ email });
 
         if (user) {
             return res.status(400).json({
-                message: "User email or name already exist"
+                message: "User email already exist"
             })
         }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt)
 
-        user = new Usermodel({
+        user = new AdminModel({
             email,
             password: hashedPassword,
-            gender,
-            name
         })
 
         await user.save()
@@ -39,16 +38,13 @@ export async function userRegister (req,res){
     }
 } 
 
-export async function userLogin(req,res){
+export async function AdminLogin(req,res){
 
-    const { EmailOrName, password } = req.body;
+    const {email, password } = req.body;
 
     try {
-        let user = await Usermodel.findOne({ email:EmailOrName })
-        
-        if (!user) {
-            user = await Usermodel.findOne({ name:EmailOrName })
-        }
+        let user = await AdminModel.findOne({ email })
+    
         if (!user) {
             return res.status(400).json({
                 message: "Invalid Email or Name"  
@@ -62,10 +58,6 @@ export async function userLogin(req,res){
                 message: "Invalid Password"
             })
         }
-
-        user.count += 1;
-        user.lastLoginDate = new Date()
-         await user.save()
         const token = jwt.sign({ userId: user._id}, process.env.SECRET_KEY, {
             expiresIn: "1d"
         })
@@ -73,7 +65,7 @@ export async function userLogin(req,res){
         return res.status(201).json({
             message: "Login Sucessfully",
             token,
-            id:user._id,
+            Adminid:user._id,
         })
     } catch (error) {
         console.log(error)
@@ -83,10 +75,9 @@ export async function userLogin(req,res){
     }
 }
 
-export async function getuser(req,res,next){  //getuser by Auth token 
-    const {userId} = req.user
+export async function getAlluser(req,res){  //getuser by Auth token 
   try {
-      let user = await Usermodel.findById({_id:userId}).select('-password')
+      let user = await Usermodel.find().select('-password')
       if(!user){
           return res.status(400).json({
               message:"User not found"
