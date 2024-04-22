@@ -16,15 +16,16 @@ app.use(cors({origin:true,credentials:true}))
 app.use(morgan('tiny'))
 app.disable('x-powered-by')
 
-app.get("/",(req,res)=>{
-    console.log("Home Request Server Running Perfectly")
-})
+
 
 app.use('/api',router)
 
 const port = process.env.port || 5000
 app.listen(port,()=>{
     console.log(`Server Connected to ${port}`)
+})
+app.get("/",(req,res)=>{
+    res.send(`Web server Is Hoisted In ${port} Port Number`)
 })
 
 
